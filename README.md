@@ -75,7 +75,7 @@ SELECT id, username FROM users WHERE username = 'admin' --' AND password = '...'
 
 **Düzeltme:** satır 96, parametreli sorgu (`WHERE username = ?`). Girdi SQL'in parçası olmaz, yalnız değer olarak gider. Parola sorguda karşılaştırılmaz; satır 97'de `check_password_hash` ile hash'e karşı doğrulanır. Parolalar satır 183'te hash'lenerek saklanır (açıklı modda düz metin).
 
-**OWASP Top 10 (2021):** A03 Injection.
+**OWASP Top 10:2025:** A05 Injection (2021'de A03).
 
 ### 2. Stored XSS
 
@@ -85,9 +85,11 @@ SELECT id, username FROM users WHERE username = 'admin' --' AND password = '...'
 
 **Açıklı kod:** satır 165, mesajlar f-string ile HTML'e ekleniyor.
 
-**Düzeltme:** satır 160–162, Jinja2 şablonu otomatik kaçış uygular; `<script>` metin olarak görünür, çalışmaz. İkinci savunma hattı olarak satır 66'da `Content-Security-Policy` başlığı satır içi betikleri engeller. Satır 43'te oturum çerezi `HttpOnly` yapılır, böylece betik çerezi okuyamaz.
+**Düzeltme:** satır 160–162, Jinja2 şablonu otomatik kaçış uygular; `<script>` metin olarak görünür, çalışmaz. İkinci savunma hattı olarak satır 66'da `Content-Security-Policy` başlığı satır içi betikleri engeller.
 
-**OWASP Top 10 (2021):** A03 Injection (XSS 2021 sürümünde Injection altına alındı).
+Not: Flask oturum çerezini varsayılan olarak `HttpOnly` yapar, bu yüzden açıklı modda da betik `document.cookie` ile oturum çerezini okuyamaz. Ama bu XSS'i zararsız yapmaz: betik kurbanın tarayıcısında aynı kökenden çalıştığı için `fetch` ile kurban adına `/notes` okuyabilir ya da panoya yazabilir. Satır 43 ayrıca `SameSite=Lax` ekler; bu XSS'e değil, başka sitelerden gelen istek sahteciliğine (CSRF) karşı bir önlemdir.
+
+**OWASP Top 10:2025:** A05 Injection; XSS (CWE-79) bu kategoride yer alır (2021'de A03).
 
 ### 3. IDOR (Insecure Direct Object Reference)
 
@@ -99,7 +101,7 @@ SELECT id, username FROM users WHERE username = 'admin' --' AND password = '...'
 
 **Düzeltme:** satır 140–142, sorguya `AND owner_id = ?` eklenir. Başkasının notu 404 döner; böylece notun var olup olmadığı da sızmaz (403 dönseydi "bu numarada bir not var" bilgisi verilmiş olurdu).
 
-**OWASP Top 10 (2021):** A01 Broken Access Control.
+**OWASP Top 10:2025:** A01 Broken Access Control (2021'de de A01).
 
 ### 4. Kaba kuvvet (brute force)
 
@@ -111,7 +113,7 @@ SELECT id, username FROM users WHERE username = 'admin' --' AND password = '...'
 
 **Düzeltme:** satır 91–93 ve 98–102. Kullanıcı adı başına hatalı deneme sayılır; 5 hatadan sonra hesap 15 dakika kilitlenir ve `429` döner (sınırlar satır 20–21'de). Doğru parola listede olsa bile 6. denemeye gelinmez.
 
-**OWASP Top 10 (2021):** A07 Identification and Authentication Failures.
+**OWASP Top 10:2025:** A07 Authentication Failures (2021'de A07 Identification and Authentication Failures).
 
 **Bilinen sınırlar:** Sayaç bellekte tutulur, uygulama yeniden başlayınca sıfırlanır ve birden çok süreç arasında paylaşılmaz. Kullanıcı adına göre kilitlemek, saldırganın başkasının hesabını bilerek kilitlemesine de imkân verir. Gerçek bir sistemde IP tabanlı hız sınırı, artan bekleme süresi ya da CAPTCHA gibi önlemlerle birlikte kullanılmalıdır.
 
